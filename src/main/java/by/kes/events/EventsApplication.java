@@ -1,46 +1,52 @@
 package by.kes.events;
 
-import by.kes.events.model.Event;
-import by.kes.events.model.GetEventsResponse;
+import static java.util.Arrays.asList;
 
+import by.kes.events.dao.EventDao;
+import by.kes.events.model.Event;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Arrays;
-import java.util.List;
 
 @SpringBootApplication
 @Controller
 public class EventsApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(EventsApplication.class, args);
-	}
+  @Autowired
+  private EventDao eventDao;
 
-	@GetMapping("/api/events")
-	@ResponseBody
-	@CrossOrigin(exposedHeaders="Access-Control-Allow-Origin")
-	public GetEventsResponse getEvents() {
-		final Event event1 = new Event();
-		event1.setDate("2019-02-02T12:12:00");
-		event1.setDone(false);
-		event1.setId(5L);
-		event1.setName("Event First");
+  public static void main(String[] args) {
+    SpringApplication.run(EventsApplication.class, args);
+  }
 
-		final Event event2 = new Event();
-		event2.setDate("2019-02-02T14:14:00");
-		event2.setDone(true);
-		event2.setId(6L);
-		event2.setName("Event Second");
+  @Bean
+  CommandLineRunner runner() {
+    return args -> {
+      final Event event1 = new Event();
+      event1.setDate("2019-02-02T12:12:00");
+      event1.setDone(false);
+      event1.setId("5");
+      event1.setName("Event First");
 
-		final GetEventsResponse response = new GetEventsResponse();
-		response.setEvents(Arrays.asList(event1, event2));
-		return response;
-	}
+      final Event event2 = new Event();
+      event2.setDate("2019-02-02T14:14:00");
+      event2.setDone(true);
+      event2.setId("6");
+      event2.setName("Event Second");
 
+      final Event event3 = new Event();
+      event3.setDate("2019-01-01T01:04:00");
+      event3.setDone(false);
+      event3.setId("7");
+      event3.setName("Event Third");
+      eventDao.addAll(asList(event1, event2, event3));
+    };
+  }
 }
 

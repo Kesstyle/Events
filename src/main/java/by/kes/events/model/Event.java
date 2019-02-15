@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Event {
 
-  private Long id;
+  private String id;
   private String name;
 
   @JsonProperty("dateExpire")
@@ -12,11 +12,11 @@ public class Event {
 
   private boolean done;
 
-  public Long getId() {
+  public String getId() {
     return id;
   }
 
-  public void setId(Long id) {
+  public void setId(String id) {
     this.id = id;
   }
 
