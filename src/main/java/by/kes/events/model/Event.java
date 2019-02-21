@@ -1,7 +1,11 @@
 package by.kes.events.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "event")
 public class Event {
 
   private String id;
@@ -11,6 +15,9 @@ public class Event {
   private String date;
 
   private boolean done;
+
+  @JsonIgnore
+  private Long timestamp;
 
   public String getId() {
     return id;
@@ -42,5 +49,13 @@ public class Event {
 
   public void setDone(boolean done) {
     this.done = done;
+  }
+
+  public Long getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(Long timestamp) {
+    this.timestamp = timestamp;
   }
 }
