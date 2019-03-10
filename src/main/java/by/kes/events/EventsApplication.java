@@ -2,6 +2,7 @@ package by.kes.events;
 
 import by.kes.events.model.Event;
 import by.kes.events.repository.EventMongoRepository;
+import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Flux;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
@@ -31,41 +32,25 @@ public class EventsApplication {
   @Autowired
   private EventMongoRepository mongoRepository;
 
+  @Value("${spring.data.mongodb.host}")
+  private String mongoHost;
+
+  @Value("${spring.data.mongodb.port}")
+  private Integer mongoPort;
+
+  @Value("${spring.data.mongodb.database}")
+  private String database;
+
   public static void main(String[] args) {
     SpringApplication.run(EventsApplication.class, args);
-  }
-
-  @Bean
-  @Order(2)
-  CommandLineRunner stubRunner() {
-    return args -> {
-      final Event event1 = new Event();
-      event1.setDate("2019-02-02T12:12:00");
-      event1.setDone(false);
-      event1.setId("5");
-      event1.setName("Event First");
-
-      final Event event2 = new Event();
-      event2.setDate("2019-02-02T14:14:00");
-      event2.setDone(true);
-      event2.setId("6");
-      event2.setName("Event Second");
-
-      final Event event3 = new Event();
-      event3.setDate("2019-01-01T01:04:00");
-      event3.setDone(false);
-      event3.setId("7");
-      event3.setName("Event Third");
-      mongoRepository.saveAll(Flux.just(event1, event2, event3));
-    };
   }
 
   @Bean
   @Order(1)
   CommandLineRunner mongoRunner() {
     return args -> {
-      final MongoClient mongoClient = new MongoClient("localhost", 27017);
-      final MongoDatabase db = mongoClient.getDatabase("events");
+      final MongoClient mongoClient = new MongoClient(mongoHost, mongoPort);
+      final MongoDatabase db = mongoClient.getDatabase(database);
 
 //      db.getCollection("event_stream").drop();
 //      db.getCollection("event").drop();
