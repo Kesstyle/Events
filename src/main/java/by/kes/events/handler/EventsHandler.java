@@ -86,12 +86,13 @@ public class EventsHandler {
     final Long timestamp = System.currentTimeMillis();
     return ServerResponse.ok().contentType(TEXT_EVENT_STREAM)
         .body(Flux.just(serverRequest.pathVariable("id"))
-            .map(id -> {
+            .flatMap(id -> eventMongoRepository.findById(id))
+            .map(event -> {
               final EventStream eventStream = new EventStream();
-              eventStream.setRefId(id);
+              eventStream.setRefId(event.getId());
               eventStream.setAction(REMOVE.toString());
               eventStream.setTimestamp(timestamp);
-              eventStream.setUserId(eventStream.getUserId());
+              eventStream.setUserId(event.getUserId());
               return eventStream;
             })
             .flatMap(es -> eventStreamMongoRepository.save(es))
@@ -114,7 +115,7 @@ public class EventsHandler {
               eventStream.setRefId(e.getId());
               eventStream.setAction(UPDATE.toString());
               eventStream.setTimestamp(timestamp);
-              eventStream.setUserId(eventStream.getUserId());
+              eventStream.setUserId(e.getUserId());
               return eventStream;
             })
             .flatMap(es -> eventStreamMongoRepository.save(es))
