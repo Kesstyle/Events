@@ -1,15 +1,13 @@
 package by.kes.events;
 
-import by.kes.events.model.Event;
 import by.kes.events.repository.EventMongoRepository;
-import org.springframework.beans.factory.annotation.Value;
-import reactor.core.publisher.Flux;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -52,9 +50,6 @@ public class EventsApplication {
       final MongoClient mongoClient = new MongoClient(mongoHost, mongoPort);
       final MongoDatabase db = mongoClient.getDatabase(database);
 
-//      db.getCollection("event_stream").drop();
-//      db.getCollection("event").drop();
-
       final List<String> collections = db.listCollectionNames().into(new ArrayList<>());
       if (!collections.contains("event_stream")) {
         final CreateCollectionOptions options = new CreateCollectionOptions();
@@ -64,11 +59,16 @@ public class EventsApplication {
         db.createCollection("event_stream", options);
         db.getCollection("event_stream").insertOne(new Document("id", "test"));
       }
-//      db.getCollection("event_stream").insertOne(new Document("id", "test"));
-      if (!collections.contains("event")) {
-        db.createCollection("event");
-      }
+      createCollectionIfNotExists(db, collections, "event");
+      createCollectionIfNotExists(db, collections, "event_users");
     };
+  }
+
+  private void createCollectionIfNotExists(final MongoDatabase db,
+                                           final List<String> collections, final String name) {
+    if (!collections.contains(name)) {
+      db.createCollection(name);
+    }
   }
 
 }

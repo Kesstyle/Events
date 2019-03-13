@@ -26,7 +26,10 @@ public class EventsConfiguration implements WebFluxConfigurer {
         .andRoute(POST("/api/event"), eventsHandler::addEvent)
         .andRoute(OPTIONS("/api/**"), commonHandler::getOptions)
         .andRoute(DELETE("/api/event/{id}"), eventsHandler::removeEvent)
-        .andRoute(PUT("/api/event"), eventsHandler::updateEvent);
+        .andRoute(PUT("/api/event"), eventsHandler::updateEvent)
+        .andRoute(GET("/api/users"), eventsHandler::getUsers)
+        .andRoute(GET("/api/user/{id}"), eventsHandler::getUser)
+        .andRoute(POST("/api/user"), eventsHandler::saveUser);
   }
 
   @Override

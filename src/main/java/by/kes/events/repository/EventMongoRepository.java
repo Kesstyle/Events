@@ -7,5 +7,6 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 public interface EventMongoRepository extends ReactiveCrudRepository<Event, String> {
 
-  Flux<Event> findByTimestampLessThan(final Long timestamp);
+  Flux<Event> findByUserId(final String userId);
+  Flux<Event> findByTimestampLessThanAndUserId(final Long timestamp, final String userId);
 }

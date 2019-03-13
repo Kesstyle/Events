@@ -8,6 +8,7 @@ public class EventStream {
   private String refId;
   private String action;
   private Long timestamp;
+  private String userId;
 
   public String getRefId() {
     return refId;
@@ -31,5 +32,13 @@ public class EventStream {
 
   public void setTimestamp(Long timestamp) {
     this.timestamp = timestamp;
+  }
+
+  public String getUserId() {
+    return userId;
+  }
+
+  public void setUserId(String userId) {
+    this.userId = userId;
   }
 }

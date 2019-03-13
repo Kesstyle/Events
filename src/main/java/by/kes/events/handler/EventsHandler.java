@@ -8,8 +8,10 @@ import static by.kes.events.model.EventModifyType.UPDATE;
 
 import by.kes.events.model.Event;
 import by.kes.events.model.EventStream;
+import by.kes.events.model.EventUser;
 import by.kes.events.repository.EventMongoRepository;
 import by.kes.events.repository.EventStreamMongoRepository;
+import by.kes.events.repository.EventUserMongoRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -19,6 +21,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import java.time.Duration;
+import java.util.Optional;
 
 @Component
 public class EventsHandler {
@@ -27,13 +30,23 @@ public class EventsHandler {
   private EventMongoRepository eventMongoRepository;
 
   @Autowired
+  private EventUserMongoRepository eventUserMongoRepository;
+
+  @Autowired
   private EventStreamMongoRepository eventStreamMongoRepository;
 
   public Mono<ServerResponse> getEvents(final ServerRequest request) {
     final Long timestamp = System.currentTimeMillis();
+    final String userId = Optional.ofNullable(request.headers().header("UID_H"))
+        .filter(h -> !h.isEmpty())
+        .map(h -> h.get(0))
+        .orElse(null);
     return ServerResponse.ok().contentType(TEXT_EVENT_STREAM)
-        .body(eventMongoRepository.findByTimestampLessThan(timestamp).mergeWith(
-            eventStreamMongoRepository.findWithTailableCursorByTimestampGreaterThan(timestamp)
+        .body(eventMongoRepository
+                .findByTimestampLessThanAndUserId(timestamp, userId)
+                .mergeWith(
+            eventStreamMongoRepository
+                .findWithTailableCursorByTimestampGreaterThanAndUserId(timestamp, userId)
                 .flatMap(es ->
                     eventMongoRepository.findAllById(Mono.just(es.getRefId()))
                         .map(e -> {
@@ -62,6 +75,7 @@ public class EventsHandler {
               eventStream.setRefId(e.getId());
               eventStream.setAction(ADD.toString());
               eventStream.setTimestamp(timestamp);
+              eventStream.setUserId(e.getUserId());
               return eventStream;
             })
             .flatMap(es -> eventStreamMongoRepository.save(es))
@@ -77,6 +91,7 @@ public class EventsHandler {
               eventStream.setRefId(id);
               eventStream.setAction(REMOVE.toString());
               eventStream.setTimestamp(timestamp);
+              eventStream.setUserId(eventStream.getUserId());
               return eventStream;
             })
             .flatMap(es -> eventStreamMongoRepository.save(es))
@@ -99,9 +114,25 @@ public class EventsHandler {
               eventStream.setRefId(e.getId());
               eventStream.setAction(UPDATE.toString());
               eventStream.setTimestamp(timestamp);
+              eventStream.setUserId(eventStream.getUserId());
               return eventStream;
             })
             .flatMap(es -> eventStreamMongoRepository.save(es))
             .then(), Void.class);
+  }
+
+  public Mono<ServerResponse> getUsers(final ServerRequest serverRequest) {
+    return ServerResponse.ok().contentType(TEXT_EVENT_STREAM)
+        .body(eventUserMongoRepository.findAll(), EventUser.class);
+  }
+
+  public Mono<ServerResponse> getUser(final ServerRequest serverRequest) {
+    return ServerResponse.ok().contentType(TEXT_EVENT_STREAM)
+        .body(eventUserMongoRepository.findByUserId(serverRequest.pathVariable("id")), EventUser.class);
+  }
+
+  public Mono<ServerResponse> saveUser(final ServerRequest serverRequest) {
+    return ServerResponse.ok().contentType(TEXT_EVENT_STREAM)
+        .body(eventUserMongoRepository.saveAll(serverRequest.bodyToFlux(EventUser.class)).then(), Void.class);
   }
 }

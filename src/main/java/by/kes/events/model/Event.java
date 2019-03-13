@@ -19,6 +19,8 @@ public class Event {
   @JsonIgnore
   private Long timestamp;
 
+  private String userId;
+
   public String getId() {
     return id;
   }
@@ -57,5 +59,13 @@ public class Event {
 
   public void setTimestamp(Long timestamp) {
     this.timestamp = timestamp;
+  }
+
+  public String getUserId() {
+    return userId;
+  }
+
+  public void setUserId(String userId) {
+    this.userId = userId;
   }
 }
