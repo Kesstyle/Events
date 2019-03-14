@@ -37,9 +37,7 @@ public class EventsHandler {
 
   public Mono<ServerResponse> getEvents(final ServerRequest request) {
     final Long timestamp = System.currentTimeMillis();
-    final String userId = Optional.ofNullable(request.headers().header("UID_H"))
-        .filter(h -> !h.isEmpty())
-        .map(h -> h.get(0))
+    final String userId = request.queryParam("UID_H")
         .orElse(null);
     return ServerResponse.ok().contentType(TEXT_EVENT_STREAM)
         .body(eventMongoRepository
