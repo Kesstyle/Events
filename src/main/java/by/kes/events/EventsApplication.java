@@ -61,6 +61,7 @@ public class EventsApplication {
       }
       createCollectionIfNotExists(db, collections, "event");
       createCollectionIfNotExists(db, collections, "event_users");
+      createCollectionIfNotExists(db, collections, "event_schedule");
     };
   }
 

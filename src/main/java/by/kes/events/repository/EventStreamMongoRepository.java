@@ -9,9 +9,6 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 public interface EventStreamMongoRepository extends ReactiveCrudRepository<EventStream, String> {
 
   @Tailable
-  Flux<EventStream> findWithTailableCursorByUserId(final String userId);
-
-  @Tailable
   Flux<EventStream> findWithTailableCursorByTimestampGreaterThanAndUserId(final Long timestamp,
                                                                           final String userId);
 }
